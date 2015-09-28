@@ -1,0 +1,23 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="bootstrap">
+    <link rel="stylesheet" href="/css/bootstrap.min.css"/>
+    <script src="/js/bootstrap.min.js"></script>
+</div>
+<div th:fragment="jquerys">
+    <link rel="stylesheet" href="/css/jquery-ui.css"/>
+    <script src="/js/jquery-1.11.2.min.js"></script>
+    <script src="/js/jquery-ui.min.js"></script>
+</div>
+<div th:fragment="underscore">
+    <script src="/js/underscore-min.js"></script>
+    <script>
+        _.templateSettings = {
+            evaluate: /\{\{(.+?)\}\}/g,
+            interpolate: /\{\{=(.+?)\}\}/g,
+            escape: /\{\{-(.+?)\}\}/g
+        };
+    </script>
+</div>
+</body>
+</html>

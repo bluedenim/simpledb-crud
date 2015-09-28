@@ -1,0 +1,24 @@
+.dlg-row {
+    width: 90%;
+}
+
+.dlg-row label {
+    width: 100%;
+}
+
+.dlg-row input {
+    width: 100%;
+}
+
+.bolded {
+    font-weight: bold;
+}
+
+.italic {
+    font-style: italic;
+}
+
+input {
+    width: 100%;
+}
+

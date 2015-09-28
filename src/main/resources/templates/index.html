@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="-1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" type="text/css" href="/css/simpledbui/home.css" />
+    <link rel="stylesheet" type="text/css" href="/css/simpledbui/add-tab.css" />
+    <link rel="stylesheet" type="text/css" href="/css/simpledbui/dialogs.css" />
+</head>
+<body>
+<nav>
+    <ul class="navbar navbar-default">
+        <div id="region-list">
+            <select id="region-ctrl" name="region">
+                <option value="region-name" th:each="r: ${regions}" th:value="${r}" th:text="${r}"></option>
+            </select>
+        </div>
+        <div class="right" id="app-name">
+            SimpleDB Tool
+        </div>
+    </ul>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <div id="db-list-column" class="col-xs-3 col-md-3">
+            <div id="db-list-container">
+                <div id="db-controls-instructions">
+                    <div>Domains for region:</div>
+                    <div id="current-region-name-label"></div>
+                </div>
+                <div id="db-controls-container">
+                    <div id="db-buttons-container">
+                        <button id="db-refresh-btn" class="btn btn-default">
+                            <span class="glyphicon glyphicon-refresh"></span>
+                        </button>
+                        <button id="db-add-btn" class="btn btn-default">
+                            <span class="glyphicon glyphicon-plus"></span>
+                        </button>
+                        <button id="db-delete-btn" class="btn btn-default" style="display:none;">
+                            <span class="glyphicon glyphicon-minus"></span>
+                        </button>
+                    </div>
+                </div>
+                <div id="db-list" class="list-group" style="display:none">
+                </div>
+            </div>
+        </div>
+        <div id="operations-column" class="col-xs-9 col-md-9">
+            <div id="operations-placeholder">Select a domain</div>
+            <div id="operations-panel" style="display:none;">
+                <ul>
+                    <li><a href="#query-tab"><span class="glyphicon glyphicon-search"></span> Select</a></li>
+                    <li><a href="#add-tab"><div class="glyphicon glyphicon-plus"></div> Add</a></li>
+                </ul>
+                <div id="query-tab">
+                    <div id="query-composer-query-panel">
+                        <textarea id="query-text" rows="5"></textarea>
+                    </div>
+                    <div id="query-composer-button-panel" class="right">
+                        <button id="query-button"><div class="glyphicon glyphicon-play"></div></button>
+                    </div>
+                    <div id="results-panel-id" class="results-panel">
+                        <table id="results-table-id" class="table table-striped results-table">
+                        </table>
+
+                    </div>
+                </div>
+                <div id="add-tab">
+                    <div id="item-edit-dlg-container-id" class="dlg-container item-edit-dlg-container">
+                        <div class="dlg-row add-item-dlg-row item-name-row">
+                            <div class="edit-cell prop-name">Item Name:</div>
+                            <div class="edit-cell prop-value"><input type="text" id="item-name" name="item_name" /></div>
+                            <div class="dlg-row clear"></div>
+                        </div>
+                        <div id="add-item-attributes-container" class="dlg-row">
+                            <div class="dlg-row">Attributes:</div>
+                            <div class="dlg-row add-item-dlg-row item-attribute-row">
+                                <div class="edit-cell prop-name"><input type="text" id="prop-name-1" name="prop_name_1" placeholder="AttributeName" /></div>
+                                <div class="edit-cell prop-value"><input type="text" id="prop-val-1" name="prop_val_1" placeholder="Attribute Value" /></div>
+                                <div class="dlg-row clear"></div>
+                            </div>
+                            <div class="dlg-row add-item-dlg-row item-attribute-row">
+                                <div class="edit-cell prop-name"><input type="text" id="prop-name-2" name="prop_name_2" /></div>
+                                <div class="edit-cell prop-value"><input type="text" id="prop-val-2" name="prop_val_2" /></div>
+                                <div class="dlg-row clear"></div>
+                            </div>
+                            <div id="add-item-attributes-list-clear-id" class="dlg-row clear"></div>
+                        </div>
+                        <div class="dlg-row clear"></div>
+                        <div class="dlg-row">
+                            <span id="add-item-instructions">Entries with empty names will be ignored.</span>
+                        </div>
+                        <div id="add-item-add-row">
+                            <button id="add-item-add-row-button-id">
+                                <span class="glyphicon glyphicon-plus"></span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dlg-row submit-btn-row right">
+                        <button id="add-item-submit-button-id"><span class="glyphicon glyphicon-play"/></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:include="fragments/js :: jquerys"></div>
+<div th:include="fragments/js :: bootstrap"></div>
+<div th:include="fragments/js :: underscore"></div>
+<div th:include="fragments/dialogs :: add"></div>
+<div th:include="fragments/dialogs :: edit"></div>
+<div th:include="fragments/dialogs :: delete"></div>
+<div th:include="fragments/dialogs :: delete-item"></div>
+<div th:include="fragments/dialogs :: add-db"></div>
+<div th:include="fragments/dialogs :: delete-db"></div>
+<div th:include="fragments/dialogs :: confirmation"></div>
+
+<script id="db-entry-template" type="text/template">
+    <div class="db-entry-container">
+    <button id="db-entry-id-{{=id}}" type="button" class="db-entry-name btn btn-primary">{{=name}}</button>
+    </div>
+</script>
+
+<script id="results-entry-template" type="text/template">
+    <tr data-itemname="{{print(encodeURIComponent(name));}}">
+        <th>
+            <div id="result-entry-{{ print(cleanseValue(name)); }}" class="btn-group">
+                <button class="item-name btn btn-primary" data-action="delete">{{print(encodeURIComponent(name));}}</button>
+            </div>
+        </th>
+        <td><span class="attrib-value">{{ print(expandAttributes(name, attributes)); }}</span></td>
+        <td>
+            <button id="add-item-{{ print(cleanseValue(name)); }}-btn" data-action="addAttribute" class="btn btn-primary">
+                <div class="glyphicon glyphicon-plus"></div>
+            </button>
+        </td>
+    </tr>
+</script>
+
+<script id="attribute-template" type="text/template">
+    <span class="attribute-entry attrib-block btn-group btn-group-sm">
+        <button id="{{ print(cleanseValue(itemName, name)); }}-name" data-action="deleteAttribute" data-attr-name="{{print(encodeURIComponent(name));}}" class="btn btn-primary attrib attrib-name">{{print(encodeURIComponent(name));}}</button>
+        <button id="{{ print(cleanseValue(itemName, name)); }}-value" data-action="editAttribute" data-attr-name="{{print(encodeURIComponent(name));}}" data-attr-orig-val="{{print(encodeURIComponent(value));}}" class="btn btn-default attrib attrib-value">{{print(encodeURIComponent(value));}}</button>
+    </span>
+</script>
+
+<script id="add-item-row-template" type="text/template">
+    <div class="dlg-row add-item-dlg-row item-attribute-row">
+        <div class="edit-cell prop-name"><input type="text" id="prop-name-{{=index}}" name="prop_name_{{=index}}" /></div>
+        <div class="edit-cell prop-value"><input type="text" id="prop-val-{{=index}}" name="prop_val_{{=index}}" /></div>
+        <div class="dlg-row clear"></div>
+    </div>
+</script>
+
+<script>
+    // <![CDATA[
+    var _region = undefined;
+
+    var _dbsByRegion = {};
+
+    var _dbList = {};       // Map of elem ID to DB name
+    var _db = undefined;    // currently selected DB elem ID
+
+
+    // General helpers
+    ///////////////////////////////////////////////////////////////////////////
+    function highlightElement(elem, highlight) {
+        if (highlight) {
+            $(elem).removeClass('btn-primary').addClass('btn-warning');
+        } else {
+            $(elem).removeClass('btn-warning').addClass('btn-primary');
+        }
+    }
+
+    function getSelectedOptionValue(selectElem) {
+        var selected = undefined;
+        var index = $(selectElem).prop('selectedIndex');
+        if (index >= 0) {
+            selected = $($(selectElem).find('option')[index]).val();
+        }
+        return selected;
+    }
+
+    function escapeDbName(dbName) {
+        // http://docs.aws.amazon.com/AmazonSimpleDB/latest/DeveloperGuide/QuotingRulesSelect.html
+        var escape = false;
+        var c = dbName.charAt(0);
+        if (c.match(/[0-9]/)) {
+            escape = true;
+        } else {
+
+        }
+        if (escape) {
+            dbName = '`' + dbName + '`';
+        }
+        return dbName;
+    }
+
+    function showConfirmationDlg(dlg_item_id, title_text, height, pre_open_cb, ok_cb) {
+        var dlg = $(dlg_item_id).dialog({
+            model: true, autoOpen: false,
+            title: title_text,
+            height: height,
+            hide: 'fade',
+            buttons: [
+                {
+                    text: 'OK',
+                    click: function() {
+                        ok_cb($(this));
+                        dlg.dialog('close');
+                    }
+                }
+            ]
+        });
+        if (pre_open_cb) {
+            pre_open_cb(dlg);
+        }
+        dlg.dialog('open');
+    }
+
+    function showDlg(dlg_item_id, title_text, height, pre_open_cb, ok_cb) {
+        var dlg = $(dlg_item_id).dialog({
+            model: true, autoOpen: false,
+            title: title_text,
+            height: height,
+            hide: 'fade',
+            buttons: [
+                {
+                    text: 'Cancel',
+                    click: function() {
+                        $(this).dialog('close');
+                    }
+                },
+                {
+                    text: 'OK',
+                    click: function() {
+                        ok_cb($(this));
+                        dlg.dialog('close');
+                    }
+                }
+            ]
+        });
+        if (pre_open_cb) {
+            pre_open_cb(dlg);
+        }
+        dlg.dialog('open');
+    }
+
+    function resetInputBehavior(elem, init_val, max_length, validation_regex) {
+        var je = $(elem);
+        je.val(init_val);
+        je.attr('maxlength', '' + max_length);
+        if (validation_regex) {
+            je.off('keypress');
+            je.on('keypress', function(evt) {
+                if (!validation_regex.test(String.fromCharCode(evt.which))) {
+                    evt.preventDefault();
+                    evt.returnValue = false;
+                }
+            });
+        }
+        return elem;
+    }
+
+    // Domain helpers
+    ///////////////////////////////////////////////////////////////////////////
+    function showPropAddDlg(dlg_elem_id, item_name, ok_cb) {
+        showDlg(dlg_elem_id, item_name, 400,
+            function(dlg) {
+                resetInputBehavior(dlg.find('#add-attribute-name-id'), '', 255, /[a-zA-Z0-9\._\-]/);
+                resetInputBehavior(dlg.find('#add-attribute-value-id'),
+                    '', 1024);
+            },
+            function(dlg) {
+                var attr_name = dlg.find('#add-attribute-name-id').val();
+                var attr_val = dlg.find('#add-attribute-value-id').val();
+                ok_cb(attr_name, attr_val);
+            }
+        );
+    }
+
+    function showPropEditDlg(dlg_elem_id, item_name, prop_name, prop_value, ok_cb) {
+        showDlg(dlg_elem_id, item_name, 300,
+            function(dlg) {
+                dlg.find('#edit-label-id').text(prop_name);
+
+                resetInputBehavior(dlg.find('#edit-entry-id'), prop_value, 1024)
+                    .select();
+            },
+            function(dlg) {
+                var new_value = dlg.find('#edit-entry-id').val();
+                if (new_value != prop_value) {
+                    ok_cb(new_value);
+                }
+            }
+        );
+    }
+
+    function showPropDeleteDlg(dlg_elem_id, item_name, prop_name, ok_cb) {
+        showDlg(dlg_elem_id, item_name, 200,
+            function(dlg) {
+                dlg.find('#delete-label-id').text(prop_name);
+            },
+            function(dlg) {
+                ok_cb();
+            }
+        );
+    }
+
+    function showAddDbDlg(dlg_item_id, title_text, ok_cb) {
+        showDlg(dlg_item_id, title_text, 300,
+            function(dlg) {
+                // http://docs.aws.amazon.com/AmazonSimpleDB/latest/DeveloperGuide/SDBLimits.html
+                resetInputBehavior(dlg.find('#add-db-entry-id'), '', 255, /[a-zA-Z0-9\._\-]/);
+            },
+            function(dlg) {
+                var db_name = dlg.find('#add-db-entry-id').val();
+                if (db_name && db_name.length > 0) {
+                    ok_cb(db_name);
+                }
+            }
+        );
+    }
+
+    function showDeleteDbDlg(dlg_item_id, title_text, db_name, ok_cb) {
+        showDlg(dlg_item_id, title_text, 300,
+            function(dlg) {
+                dlg.find('#delete-db-dlg-domain-name').text(db_name);
+            },
+            function(dlg) {
+                ok_cb(db_name);
+            }
+        );
+    }
+
+    function showDeleteItemDlg(dlg_item_id, title_text, item_name, ok_cb) {
+        showDlg(dlg_item_id, title_text, 300,
+            function(dlg) {
+                dlg.find('#delete-item-dlg-item-name').text(item_name);
+            },
+            function(dlg) {
+                ok_cb(item_name);
+            }
+        );
+    }
+
+    function cleanseValue() {
+        var answer = '';
+        for (var i = 0; i < arguments.length; i++) {
+            if (answer.length > 0) {
+                answer = answer + '_';
+            }
+            answer = answer + arguments[i].replace(/\W/g, '_');
+        }
+        return answer;
+    }
+
+    function updateCurrentRegionName() {
+        $('#current-region-name-label').text(_region || '<select region above>');
+    }
+
+    function getDbsForRegion(region, processor) {
+        $.ajax({
+            url: '/simdb/' + region + '/dbs',
+        }).done(function(data) {
+            data = _.map(data.result, function(region_name) {
+                return {id: region_name, name: region_name}
+            });
+            processor(data);
+        }).fail(function(jqXHR, textStatus, errorThrown ) {
+            alert('Error: ' + errorThrown);
+        });
+    }
+
+    function runDbQueryWith(region, dbName, query, processor) {
+        $.ajax({
+            url: '/simdb/' + region + '/' + dbName + '/query',
+            data: {query: query}
+        }).done(function(data) {
+            if (processor != undefined) {
+                processor(data);
+            }
+        }).fail(function(jqXHR, textStatus, errorThrown ) {
+            alert('Error: ' + errorThrown);
+        });
+    }
+
+    function runDbQuery() {
+        var db_selected = _dbList[_db];
+        var query = $('#query-text').val();
+        runDbQueryWith(_region, db_selected, query, function(data) {
+            var elem = $('#results-table-id');
+            elem.hide();
+            elem.empty();
+            elem.click(itemSubElemClicked);
+            elem.append('<tbody id="results-table-body"><tr id="results-header-id">' +
+                   '<th class="result-name-column">itemName()</th>' +
+                   '<th colspan="2">...</th>' +
+                '</tr></tbody>');
+            expandAndPopulate($('#results-table-body'), data.result.items, '#results-entry-template', undefined);
+            elem.show();
+        });
+    }
+
+    function refreshDbList() {
+        var selectedRegion = _region;
+        $('#db-delete-btn').hide();
+        getDbsForRegion(selectedRegion, function(data) {
+            _dbsByRegion[selectedRegion] = data;
+            setAndRenderDbList(data);
+            resetOperations();
+        });
+    }
+
+    function expandAndPopulate(parentElem, data, templateId, cb) {
+        _.each(data, function(entry) {
+            if (undefined != cb) {
+              cb(entry);
+            }
+            var t = _.template($(templateId).text());
+            parentElem.append(t(entry));
+        });
+    }
+
+    function setAndRenderDbList(dbData) {
+        var db_list_elem = $('#db-list');
+        db_list_elem.hide();
+        db_list_elem.empty();
+        _dbList = {};
+        _.each(dbData, function(db_entry) {
+            db_entry.id = cleanseValue(db_entry.id);
+            insertDb(db_entry);
+            renderDb(db_entry);
+        });
+        db_list_elem.show();
+    }
+
+    function renderDb(db_id_name) {
+        var db_list_elem = $('#db-list');
+        var t = _.template($('#db-entry-template').text());
+        db_list_elem.append(t(db_id_name));
+    }
+
+    function insertDb(db_id_name) {
+        _dbList['db-entry-id-' + db_id_name.id] = db_id_name.name;
+    }
+
+    function resetOperations() {
+        $('#operations-panel').hide();
+        $('#query-text').val('');
+        $('#results-table-body').empty();
+        $('#operations-placeholder').show();
+    }
+
+    function expandAttributes(item_name, attribs) {
+        return _.reduce(attribs,
+            function(acc, attrib) {
+                var t = _.template($('#attribute-template').text());
+                attrib.itemName = item_name;
+                return acc + t(attrib);
+            },
+            '');
+    }
+
+    function deleteItem(item_name, cb) {
+        var region = _region;
+        var db = _dbList[_db];
+        $.ajax({
+            url: '/simdb/' + region + '/' + db + '/deletion/item',
+            method: 'POST',
+            data: {itemName: item_name}
+        }).done(function(data) {
+            cb();
+        }).fail(function(jqXHR, textStatus, errorThrown ) {
+            alert('Error: ' + errorThrown);
+        });
+    }
+
+    function updateAttrElem(item_name, attr_name, new_value) {
+        var id = '#' + cleanseValue(item_name, attr_name) + '-value';
+        var elem = $(id);
+        elem.data('attr-orig-val', new_value);
+        elem.text(new_value);
+    }
+
+    function deleteAttrElem(item_name, attr_name) {
+        var id = '#' + cleanseValue(item_name, attr_name) + '-value';
+        var elem = $(id).parent();
+        elem.remove();
+    }
+
+    function attribUpdate(item_name, attr_name, value, cb) {
+        var region = _region;
+        var db = _dbList[_db];
+        $.ajax({
+            url: '/simdb/' + region + '/' + db + '/item/' + encodeURIComponent(item_name),
+            method: 'POST',
+            data: {attribute: attr_name, value: value}
+        }).done(function(data) {
+            // Successfully updated in the backend, so update the UI
+            cb();
+        }).fail(function(jqXHR, textStatus, errorThrown ) {
+            alert('Error: ' + errorThrown);
+        });
+    }
+
+    function attribDelete(item_name, attr_name) {
+        var region = _region;
+        var db = _dbList[_db];
+        $.ajax({
+            url: '/simdb/' + region + '/' + db + '/deletion/item/attribute',
+            data: {itemName: item_name, attrName: attr_name},
+            method: 'POST'
+        }).done(function(data) {
+            // Successfully deleted in the backend, so update the UI
+            deleteAttrElem(item_name, attr_name);
+        }).fail(function(jqXHR, textStatus, errorThrown ) {
+            alert('Error: ' + errorThrown);
+        });
+    }
+
+    function addDb(name) {
+        var region = _region;
+        $.ajax({
+            url: '/simdb/' + region + '/dbs/' + name,
+            method: 'POST'
+        }).done(function(data) {
+            // Db created, so update the UI
+            var cleansed_name = cleanseValue(name);
+            var db_entry = {id:cleansed_name, name:name};
+            insertDb(db_entry);
+            renderDb(db_entry);
+        }).fail(function(jqXHR, textStatus, errorThrown ) {
+            alert('Error: ' + errorThrown);
+        });
+    }
+
+    function deleteDb(name) {
+        var region = _region;
+        $.ajax({
+            url: '/simdb/' + region + '/dbs/' + name,
+            method: 'DELETE'
+        }).done(function(data) {
+            // Db deleted, so update the UI
+            refreshDbList();    // Or would it be better just removing the entry?
+        }).fail(function(jqXHR, textStatus, errorThrown ) {
+            alert('Error: ' + errorThrown);
+        });
+    }
+
+    function showConfirmationDlg(title, message) {
+        showDlg('#confirmation-dlg-container-id', title, 200,
+        function(dlg) {
+            $(dlg).find('#confirmation-message-id').text(message);
+        },
+        function() {
+        });
+    }
+
+    // Event handlers
+    ///////////////////////////////////////////////////////////////////////////
+    function regionSelected(selected_region) {
+        _region = selected_region;
+        updateCurrentRegionName();
+        var data = _dbsByRegion[_region];
+        if (data != undefined) {
+            // use cached list of DBs for the selected region
+            setAndRenderDbList(data);
+        } else {
+            refreshDbList();
+        }
+        $('#db-delete-btn').hide();
+        resetOperations();
+    }
+
+    function dbSelected(selectedId) {
+        if (_db != undefined) {
+            highlightElement($('#'+_db), false);
+        }
+        highlightElement($('#'+selectedId), true);
+        $('#db-delete-btn').show();
+        _db = selectedId;
+
+        $('#operations-placeholder').hide();
+        $('#query-text').val('select * from `' + _dbList[selectedId] + '`');
+        $('#results-table-body').empty();
+        $('#operations-panel').show();
+    }
+
+    function itemSubElemClicked(event) {
+        var e = $($.event.fix(event).target);
+        var action = e.data('action');
+        var row_item_name = decodeURIComponent(e.parents('tr').data('itemname'));
+
+        switch(action) {
+            case 'delete':
+                showDeleteItemDlg('#delete-item-dlg-container-id', 'Delete Item', row_item_name, function() {
+                    deleteItem(row_item_name, function() {
+                        $('#results-table-id tr').filter(function(index) {
+                            return (decodeURIComponent($(this).data('itemname')) == row_item_name);
+                        }).remove();
+                    });
+                });
+                break;
+            case 'addAttribute':
+                showPropAddDlg('#add-dlg-container-id', row_item_name,
+                    function(name, value) {
+                        attribUpdate(row_item_name, name, value, function() {
+                            var attribs_parent = e.closest('tr').find('td>span.attrib-value');
+                            attribs_parent.append(expandAttributes(row_item_name, [{name: name, value: value}]));
+                        });
+                    }
+                );
+                break;
+            case 'deleteAttribute':
+                var attr_name = decodeURIComponent(e.data('attr-name'));
+                showPropDeleteDlg('#delete-dlg-container-id', row_item_name, attr_name, function() {
+                    attribDelete(row_item_name, attr_name);
+                });
+                break;
+            case 'editAttribute':
+                var attr_orig_val = decodeURIComponent(e.data('attr-orig-val'));
+                var attr_name = decodeURIComponent(e.data('attr-name'));
+                showPropEditDlg('#edit-dlg-container-id', row_item_name, attr_name, attr_orig_val, function(new_value) {
+                    attribUpdate(row_item_name, attr_name, new_value, function() {
+                        updateAttrElem(row_item_name, attr_name, new_value);
+                    });
+                });
+                break;
+            default:
+                break;
+        }
+    }
+
+    function addDbClicked() {
+        showAddDbDlg('#add-db-dlg-container-id', 'Add Domain', function(name) {
+            addDb(name);
+        });
+    }
+
+    function deleteDbClicked() {
+        if (_db != undefined) {
+            var name = _dbList[_db];
+            showDeleteDbDlg('#delete-db-dlg-container-id', 'Delete Domain', name,
+                function() {
+                    deleteDb(name);
+                }
+            );
+        }
+    }
+
+    function addAttributeRowToAddPanel() {
+        var t = _.template($('#add-item-row-template').text());
+        var index = $('#add-item-attributes-container .item-attribute-row').length + 1;
+        var sibling = $('#add-item-attributes-container .item-attribute-row:last');
+        sibling.after(t({index: index}));
+
+        resetInputBehavior($('#add-tab div.prop-name input'), '', 255, /[a-zA-Z0-9\._\-]/);
+        resetInputBehavior($('#add-tab div.prop-value input'), '', 1024);
+    }
+
+    function extractNewItemData() {
+        var item_name = $('#item-name').val();
+        var item_attribs = [];
+        $('#add-item-attributes-container .item-attribute-row').each(function(index) {
+            var i = new Number(index + 1);
+            item_attribs.push({name: $(this).find('#prop-name-' + i).val(),
+                value: $(this).find('#prop-val-' + i).val()});
+        });
+        return {item_name: item_name, item_attributes: item_attribs};
+    }
+
+    function addItem(item_name, item_attributes, ok_cb) {
+        var region = _region;
+        var db = _dbList[_db];
+        $.ajax({
+            url: '/simdb/' + region + '/' + db + '/items',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({itemName: item_name, attributes: item_attributes})
+        }).done(function(data) {
+            // Item added
+            ok_cb();
+        }).fail(function(jqXHR, textStatus, errorThrown ) {
+            alert('Error: ' + errorThrown);
+        });
+    }
+
+    function resetAddItemForm() {
+        $('#item-name').val('');
+        $('#add-item-attributes-container .item-attribute-row').each(function(index) {
+            var i = new Number(index + 1);
+            $(this).find('#prop-name-' + i).val('');
+            $(this).find('#prop-val-' + i).val('');
+        });
+    }
+
+    // Event Listener Registration
+    ///////////////////////////////////////////////////////////////////////////
+    $('#region-ctrl').on('change', function(event) {
+        var region_selected = getSelectedOptionValue(event.target);
+        regionSelected(region_selected);
+    });
+
+    $('#db-refresh-btn').click(function(event) {
+        refreshDbList();
+    });
+
+    $('#db-add-btn').click(function(event) {
+        addDbClicked();
+    });
+    $('#db-delete-btn').click(function(event) {
+        deleteDbClicked();
+    });
+
+    $('#db-list').click(function(event) {
+        var target = $(event.target);
+        if (target.hasClass('db-entry-name')) {
+            dbSelected(target.attr('id'));
+        }
+    });
+
+    $('#query-button').click(function(event) {
+        runDbQuery();
+    });
+
+    $('#add-item-add-row-button-id').click(function(event) {
+        addAttributeRowToAddPanel();
+    });
+
+    $('#add-item-submit-button-id').click(function(event) {
+        var data = extractNewItemData();
+        addItem(data.item_name, data.item_attributes, function() {
+            // Reset the form to prepare for more
+            showConfirmationDlg('Item Added', 'Item ' + data.item_name + ' created successfully.');
+            resetAddItemForm();
+        });
+    });
+
+$(function() {
+    $( "#operations-panel" ).tabs({active: 0});
+    $.ajaxSetup ({
+        // Disable caching of AJAX responses
+        cache: false
+    });
+    _region = getSelectedOptionValue($('#region-ctrl'));
+    updateCurrentRegionName();
+
+    // Sets up field validation for the Add tab
+    resetInputBehavior($('#add-tab input#item-name'), '', 255, /[a-zA-Z0-9\._\-]/);
+
+    resetInputBehavior($('#add-tab div.prop-name input'), '', 255, /[a-zA-Z0-9\._\-]/);
+    resetInputBehavior($('#add-tab div.prop-value input'), '', 1024);
+});
+// ]]>
+
+</script>
+</body>
+</html>

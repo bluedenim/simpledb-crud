@@ -1,0 +1,64 @@
+#add-tab {
+    width: 100%;
+    padding: 10px;
+}
+
+.item-edit-dlg-container {
+    color: white;
+}
+
+.item-name-row {
+    margin-bottom: 15px;
+}
+
+#add-item-add-row {
+    margin-top: 15px;
+}
+
+#add-item-add-row-button-id {
+    color: black;
+}
+
+#add-item-instructions {
+    font-style: italic;
+    font-size: small;
+}
+
+.edit-cell input {
+    color: black;
+    border: 0px;
+    padding: 3px;
+    -webkit-box-shadow: inset 0px 0px 15px -4px rgba(0,0,0,1);
+    -moz-box-shadow: inset 0px 0px 15px -4px rgba(0,0,0,1);
+    box-shadow: inset 0px 0px 15px -4px rgba(0,0,0,1);
+}
+
+#item-edit-dlg-container-id input {
+    width: 100%;
+}
+
+.prop-name {
+    width: 33%;
+    margin-right: 2%;
+}
+
+.prop-value {
+    width: 65%;
+}
+
+.add-item-dlg-row {
+    display: block-inline;
+    width: 100%;
+}
+
+.edit-cell {
+    float: left;
+}
+
+.clear {
+    clear: left;
+}
+
+.dlg-row.submit-btn-row {
+    width: 100%;
+}

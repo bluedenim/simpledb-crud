@@ -1,0 +1,87 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="edit">
+    <div id="edit-dlg-container-id" class="dlg-container edit-dlg-container" style="display:none;">
+        <div class="dlg-row">
+            <label id="edit-label-id" class="val-label"></label>
+        </div>
+        <div class="dlg-row">
+            <textarea class="val-input" id="edit-entry-id" rows="5"></textarea>
+        </div>
+    </div>
+</div>
+
+<div th:fragment="add">
+    <div id="add-dlg-container-id" class="dlg-container add-dlg-container" style="display:none;">
+        <div class="dlg-row">
+            <label class="val-label">Attribute Name:</label>
+        </div>
+        <div class="dlg-row">
+            <input type="text" class="val-input" id="add-attribute-name-id" placeholder="AttributeName"/>
+        </div>
+        <div class="dlg-row">
+            <label class="val-label">Attribute Value:</label>
+        </div>
+        <div class="dlg-row">
+            <textarea class="val-input" id="add-attribute-value-id" rows="5" placeholder="Attribute Value"></textarea>
+        </div>
+    </div>
+</div>
+
+<div th:fragment="delete">
+    <div id="delete-dlg-container-id" class="dlg-container delete-dlg-container" style="display:none;">
+        <div class="dlg-row">
+            Delete attribute <span id="delete-label-id" class="val-label bolded" ></span>?
+        </div>
+    </div>
+</div>
+
+<div th:fragment="delete-item">
+    <div id="delete-item-dlg-container-id" class="dlg-container delete-item-dlg-container" style="display:none;">
+        <div class="dlg-row">
+            <span class="italic">WARNING: All data stored under the item will be deleted.</span>
+        </div>
+        <div class="dlg-row">
+            &nbsp;
+        </div>
+        <div class="dlg-row">
+            Delete item <span id="delete-item-dlg-item-name" class="bolded"></span>?
+        </div>
+    </div>
+</div>
+
+<div th:fragment="add-db">
+    <div id="add-db-dlg-container-id" class="dlg-container add-db-dlg-container" style="display:none;">
+        <div class="dlg-row">
+            <label id="add-db-label-id" class="val-label" for="add-db-entry-id" ></label>
+        </div>
+        <div class="dlg-row">
+            <input type="text" class="val-input" id="add-db-entry-id" value="" />
+        </div>
+    </div>
+</div>
+
+<div th:fragment="delete-db">
+    <div id="delete-db-dlg-container-id" class="dlg-container delete-db-dlg-container" style="display:none;">
+        <div class="dlg-row">
+            <span class="italic">WARNING: All data stored under the domain will also be deleted.</span>
+        </div>
+        <div class="dlg-row">
+            &nbsp;
+        </div>
+        <div class="dlg-row">
+            Delete domain <span id="delete-db-dlg-domain-name" class="bolded"></span>?
+        </div>
+    </div>
+</div>
+
+<div th:fragment="confirmation">
+    <div id="confirmation-dlg-container-id" class="dlg-container confirmation-dlg-container" style="display:none;">
+        <div class="dlg-row">
+            <span id="confirmation-message-id"></span>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
