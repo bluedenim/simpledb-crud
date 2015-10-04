@@ -79,11 +79,15 @@ public class SimpleDbService {
         client.deleteDomain(request);
     }
 
-    public PaginatedResult<SelectResult> select(Region region, String domain, String query) {
+    public PaginatedResult<SelectResult> select(Region region, String domain, String query, String nextToken) {
         AmazonSimpleDBClient client = createClient(region);
         SelectRequest request =new SelectRequest()
             .withSelectExpression(query)
-            .withConsistentRead(true);
+            .withConsistentRead(true)
+            ;
+        if (!StringUtils.isEmpty(nextToken)) {
+            request.withNextToken(nextToken);
+        }
         SelectResult result = client.select(request);
         return new PaginatedResult<>(result, result.getNextToken());
     }

@@ -69,10 +69,12 @@ public class SimDb {
     }
 
     @RequestMapping("/{region}/{db}/query")
-    public Object query(@PathVariable String region, @PathVariable String db, @RequestParam String query) {
-        logger.debug(String.format("%s:%s gets query %s", region, db, query));
+    public Object query(@PathVariable String region, @PathVariable String db, @RequestParam String query,
+                        @RequestParam(required = false) String nextToken) {
+        query = query.trim();
+        logger.debug(String.format("%s:%s gets query %s, nextToken %s", region, db, query, nextToken));
         Region regionObj = dbService.findRegion(region);
-        return dbService.select(regionObj, db, query);
+        return dbService.select(regionObj, db, query, nextToken);
     }
 
     @RequestMapping(value = "/{region}/{db}/item/{item}", method = {RequestMethod.POST})

@@ -64,9 +64,16 @@
                         <button id="query-button"><div class="glyphicon glyphicon-play"></div></button>
                     </div>
                     <div id="results-panel-id" class="results-panel">
-                        <table id="results-table-id" class="table table-striped results-table">
-                        </table>
-
+                        <div>
+                            <table id="results-table-id" class="table table-striped results-table">
+                            </table>
+                        </div>
+                        <div id="pagination-panel" style="display:none;">
+                            <ul class="pager">
+                                <li id="results-first-page-btn"><a href="#"><span class="glyphicon glyphicon-fast-backward"></span></a></li>
+                                <li id="results-next-page-btn"><a href="#"><span class="glyphicon glyphicon-forward"></span></a></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
                 <div id="add-tab">
@@ -376,10 +383,10 @@
         });
     }
 
-    function runDbQueryWith(region, dbName, query, processor) {
+    function runDbQueryWith(region, dbName, query, next_token, processor) {
         $.ajax({
             url: '/simdb/' + region + '/' + dbName + '/query',
-            data: {query: query}
+            data: {query: query, nextToken: next_token}
         }).done(function(data) {
             if (processor != undefined) {
                 processor(data);
@@ -389,10 +396,10 @@
         });
     }
 
-    function runDbQuery() {
+    function runDbQuery(next_token, is_first_page) {
         var db_selected = _dbList[_db];
         var query = $('#query-text').val();
-        runDbQueryWith(_region, db_selected, query, function(data) {
+        runDbQueryWith(_region, db_selected, query, next_token, function(data) {
             var elem = $('#results-table-id');
             elem.hide();
             elem.empty();
@@ -401,9 +408,39 @@
                    '<th class="result-name-column">itemName()</th>' +
                    '<th colspan="2">...</th>' +
                 '</tr></tbody>');
+            var next_token = data.result.nextToken;
             expandAndPopulate($('#results-table-body'), data.result.items, '#results-entry-template', undefined);
             elem.show();
+
+            refreshPaginationPanel(next_token, is_first_page);
         });
+    }
+
+    function refreshPaginationPanel(next_token, is_first_page) {
+        if (!next_token) {
+            $('#results-next-page-btn').hide();
+        } else {
+            var next_btn = $('#results-next-page-btn');
+            next_btn.show();
+            next_btn.data('token', next_token);
+            next_btn.off('click');
+            next_btn.click(function(evt) {
+                runDbQuery(next_token, false);
+            });
+        }
+
+        var rewind_btn = $('#results-first-page-btn');
+        rewind_btn.off('click');
+        if (!is_first_page) {
+            rewind_btn.click(function(evt) {
+                runDbQuery(null, true);
+            });
+            rewind_btn.show();
+        } else {
+            rewind_btn.hide();
+        }
+
+        $('#pagination-panel').show();
     }
 
     function refreshDbList() {
@@ -449,8 +486,17 @@
         _dbList['db-entry-id-' + db_id_name.id] = db_id_name.name;
     }
 
+    function resetPaginationPanel() {
+        $('#pagination-panel').hide();
+        $('#results-next-page-btn').hide();
+        $.removeData($('#results-next-page-btn'), 'token');
+    }
+
     function resetOperations() {
         $('#operations-panel').hide();
+
+        resetPaginationPanel();
+
         $('#query-text').val('');
         $('#results-table-body').empty();
         $('#operations-placeholder').show();
@@ -589,6 +635,8 @@
         $('#query-text').val('select * from `' + _dbList[selectedId] + '`');
         $('#results-table-body').empty();
         $('#operations-panel').show();
+
+        resetPaginationPanel();
     }
 
     function itemSubElemClicked(event) {
@@ -725,7 +773,7 @@
     });
 
     $('#query-button').click(function(event) {
-        runDbQuery();
+        runDbQuery(null, true);
     });
 
     $('#add-item-add-row-button-id').click(function(event) {
