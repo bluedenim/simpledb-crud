@@ -2,6 +2,9 @@
 
 User interface for working with SimpleDB. The missing console plug-in in the AWS tool set.
 
+![Alt UI Preview](http://therealvan.com/image/projects/simpledb_crud.png)
+
+
 ## Prerequisite
 * AWS account set up and activated.
 * Java JRE 1.8+
