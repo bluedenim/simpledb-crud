@@ -52,3 +52,10 @@ To build the project as a runnable jar, simple clone the product onto your local
     
 Access the Webapp via: [http://localhost:8080/home/index](http://localhost:8080/home/index)
 
+### Alternate port
+Yes yes yes. Port 8080 is so popular that&mdash;chances are you already have something using 8080. Since the tool
+is based on Spring Boot, just add this flag to set the port:
+
+    -Dserver.port=8090
+    
+    
