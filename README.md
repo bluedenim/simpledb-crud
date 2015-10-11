@@ -1,4 +1,4 @@
-# SimpleDB Crud
+# SimpleDB--CRUD
 
 User interface for working with SimpleDB. The missing console plug-in in the AWS tool set.
 
