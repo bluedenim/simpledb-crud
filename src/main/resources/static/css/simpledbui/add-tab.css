@@ -24,15 +24,6 @@
     font-size: small;
 }
 
-.edit-cell input {
-    color: black;
-    border: 0px;
-    padding: 3px;
-    -webkit-box-shadow: inset 0px 0px 15px -4px rgba(0,0,0,1);
-    -moz-box-shadow: inset 0px 0px 15px -4px rgba(0,0,0,1);
-    box-shadow: inset 0px 0px 15px -4px rgba(0,0,0,1);
-}
-
 #item-edit-dlg-container-id input {
     width: 100%;
 }
@@ -53,6 +44,19 @@
 
 .edit-cell {
     float: left;
+}
+
+.edit-cell.prop-name {
+    color: black;
+}
+
+.edit-cell input {
+    color: black;
+    border: 0px;
+    padding: 3px;
+    -webkit-box-shadow: inset 0px 0px 15px -4px rgba(0,0,0,1);
+    -moz-box-shadow: inset 0px 0px 15px -4px rgba(0,0,0,1);
+    box-shadow: inset 0px 0px 15px -4px rgba(0,0,0,1);
 }
 
 .clear {

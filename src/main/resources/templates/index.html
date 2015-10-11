@@ -6,6 +6,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="-1" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SimpleDB&mdash;CRUD</title>
     <link rel="stylesheet" type="text/css" href="/css/simpledbui/home.css" />
     <link rel="stylesheet" type="text/css" href="/css/simpledbui/add-tab.css" />
     <link rel="stylesheet" type="text/css" href="/css/simpledbui/dialogs.css" />
@@ -19,7 +20,7 @@
             </select>
         </div>
         <div class="right" id="app-name">
-            SimpleDB Tool
+            SimpleDB&mdash;CRUD
         </div>
     </ul>
 </nav>
@@ -133,16 +134,16 @@
 </script>
 
 <script id="results-entry-template" type="text/template">
-    <tr data-itemname="{{print(encodeURIComponent(name));}}">
+    <tr class="results-entry-row" data-itemname="{{print(encodeURIComponent(name));}}">
         <th>
-            <div id="result-entry-{{ print(cleanseValue(name)); }}" class="btn-group">
+            <div id="result-entry-{{ print(cleanseNameValue(name)); }}" class="btn-group">
                 <button class="item-name btn btn-primary" data-action="delete">{{print(encodeURIComponent(name));}}</button>
             </div>
         </th>
-        <td><span class="attrib-value">{{ print(expandAttributes(name, attributes)); }}</span></td>
-        <td>
-            <button id="add-item-{{ print(cleanseValue(name)); }}-btn" data-action="addAttribute" class="btn btn-primary">
-                <div class="glyphicon glyphicon-plus"></div>
+        <td class="attrib-val-col"><span class="attrib-value">{{ print(expandAttributes(name, attributes)); }}</span></td>
+        <td class="attrib-add-col">
+            <button id="add-item-{{ print(cleanseNameValue(name)); }}-btn" data-action="addAttribute" class="btn btn-primary">
+                <span data-action="addAttribute" class="glyphicon glyphicon-plus"></span>
             </button>
         </td>
     </tr>
@@ -150,8 +151,15 @@
 
 <script id="attribute-template" type="text/template">
     <span class="attribute-entry attrib-block btn-group btn-group-sm">
-        <button id="{{ print(cleanseValue(itemName, name)); }}-name" data-action="deleteAttribute" data-attr-name="{{print(encodeURIComponent(name));}}" class="btn btn-primary attrib attrib-name">{{print(encodeURIComponent(name));}}</button>
-        <button id="{{ print(cleanseValue(itemName, name)); }}-value" data-action="editAttribute" data-attr-name="{{print(encodeURIComponent(name));}}" data-attr-orig-val="{{print(encodeURIComponent(value));}}" class="btn btn-default attrib attrib-value">{{print(encodeURIComponent(value));}}</button>
+        <button id="{{ print(cleanseNameValue(itemName, name)); }}-name" data-action="deleteAttribute" data-attr-name="{{print(encodeURIComponent(name));}}" class="btn btn-primary attrib attrib-name">{{print(encodeURIComponent(name));}}</button>
+        <!-- For IE, the event target is the button; for Chrome, the event target is the span. So duplicate
+             the data attributes -->
+        <button id="{{ print(cleanseNameValue(itemName, name)); }}-value" class="btn btn-default"
+            data-action="editAttribute" data-attr-name="{{print(encodeURIComponent(name));}}"
+            data-attr-orig-val="{{print(encodeURIComponent(value));}}">
+            <span class="attrib attrib-value" data-action="editAttribute" data-attr-name="{{print(encodeURIComponent(name));}}"
+                  data-attr-orig-val="{{print(encodeURIComponent(value));}}">{{print(cleanseAttrValue(value));}}</span>
+        </button>
     </span>
 </script>
 
@@ -209,7 +217,7 @@
 
     function showConfirmationDlg(dlg_item_id, title_text, height, pre_open_cb, ok_cb) {
         var dlg = $(dlg_item_id).dialog({
-            model: true, autoOpen: false,
+            modal: true, autoOpen: false,
             title: title_text,
             height: height,
             hide: 'fade',
@@ -231,7 +239,7 @@
 
     function showDlg(dlg_item_id, title_text, height, pre_open_cb, ok_cb) {
         var dlg = $(dlg_item_id).dialog({
-            model: true, autoOpen: false,
+            modal: true, autoOpen: false,
             title: title_text,
             height: height,
             hide: 'fade',
@@ -355,7 +363,7 @@
         );
     }
 
-    function cleanseValue() {
+    function cleanseNameValue() {
         var answer = '';
         for (var i = 0; i < arguments.length; i++) {
             if (answer.length > 0) {
@@ -364,6 +372,12 @@
             answer = answer + arguments[i].replace(/\W/g, '_');
         }
         return answer;
+    }
+
+    function cleanseAttrValue(value) {
+        return value.replace('<','&lt;')
+          .replace('>','&gt;')
+        ;
     }
 
     function updateCurrentRegionName() {
@@ -469,7 +483,7 @@
         db_list_elem.empty();
         _dbList = {};
         _.each(dbData, function(db_entry) {
-            db_entry.id = cleanseValue(db_entry.id);
+            db_entry.id = cleanseNameValue(db_entry.id);
             insertDb(db_entry);
             renderDb(db_entry);
         });
@@ -527,14 +541,14 @@
     }
 
     function updateAttrElem(item_name, attr_name, new_value) {
-        var id = '#' + cleanseValue(item_name, attr_name) + '-value';
+        var id = '#' + cleanseNameValue(item_name, attr_name) + '-value';
         var elem = $(id);
         elem.data('attr-orig-val', new_value);
         elem.text(new_value);
     }
 
     function deleteAttrElem(item_name, attr_name) {
-        var id = '#' + cleanseValue(item_name, attr_name) + '-value';
+        var id = '#' + cleanseNameValue(item_name, attr_name) + '-value';
         var elem = $(id).parent();
         elem.remove();
     }
@@ -576,7 +590,7 @@
             method: 'POST'
         }).done(function(data) {
             // Db created, so update the UI
-            var cleansed_name = cleanseValue(name);
+            var cleansed_name = cleanseNameValue(name);
             var db_entry = {id:cleansed_name, name:name};
             insertDb(db_entry);
             renderDb(db_entry);
