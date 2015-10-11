@@ -54,8 +54,14 @@ Access the Webapp via: [http://localhost:8080/home/index](http://localhost:8080/
 
 ### Alternate port
 Yes yes yes. Port 8080 is so popular that&mdash;chances are you already have something using 8080. Since the tool
-is based on Spring Boot, just add this flag to set the port:
+is based on Spring Boot, just add this flag to set the port: `-Dserver.port=8090`
+    
+For example:
 
-    -Dserver.port=8090
+    mvn spring-boot:run -Dserver.port=8090
+
+or    
+    
+    java -Dserver.port=8090 -jar target/simpledb-crud-0.0.1-SNAPSHOT.jar
     
     
