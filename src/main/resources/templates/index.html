@@ -137,7 +137,7 @@
     <tr class="results-entry-row" data-itemname="{{print(encodeURIComponent(name));}}">
         <th>
             <div id="result-entry-{{ print(cleanseNameValue(name)); }}" class="btn-group">
-                <button class="item-name btn btn-primary" data-action="delete">{{print(encodeURIComponent(name));}}</button>
+                <button class="item-name btn btn-primary" data-action="delete">{{print(cleanseAttrValue(name));}}</button>
             </div>
         </th>
         <td class="attrib-val-col"><span class="attrib-value">{{ print(expandAttributes(name, attributes)); }}</span></td>
@@ -151,7 +151,7 @@
 
 <script id="attribute-template" type="text/template">
     <span class="attribute-entry attrib-block btn-group btn-group-sm">
-        <button id="{{ print(cleanseNameValue(itemName, name)); }}-name" data-action="deleteAttribute" data-attr-name="{{print(encodeURIComponent(name));}}" class="btn btn-primary attrib attrib-name">{{print(encodeURIComponent(name));}}</button>
+        <button id="{{ print(cleanseNameValue(itemName, name)); }}-name" data-action="deleteAttribute" data-attr-name="{{print(encodeURIComponent(name));}}" class="btn btn-primary attrib attrib-name">{{print(cleanseAttrValue(name));}}</button>
         <!-- For IE, the event target is the button; for Chrome, the event target is the span. So duplicate
              the data attributes -->
         <button id="{{ print(cleanseNameValue(itemName, name)); }}-value" class="btn btn-default"
@@ -286,7 +286,7 @@
     function showPropAddDlg(dlg_elem_id, item_name, ok_cb) {
         showDlg(dlg_elem_id, item_name, 400,
             function(dlg) {
-                resetInputBehavior(dlg.find('#add-attribute-name-id'), '', 255, /[a-zA-Z0-9\._\-]/);
+                resetInputBehavior(dlg.find('#add-attribute-name-id'), '', 255, /[a-zA-Z0-9\._\- ]/);
                 resetInputBehavior(dlg.find('#add-attribute-value-id'),
                     '', 1024);
             },
@@ -721,7 +721,7 @@
         var sibling = $('#add-item-attributes-container .item-attribute-row:last');
         sibling.after(t({index: index}));
 
-        resetInputBehavior($('#add-tab div.prop-name input'), '', 255, /[a-zA-Z0-9\._\-]/);
+        resetInputBehavior($('#add-tab div.prop-name input'), '', 255, /[a-zA-Z0-9\._\- ]/);
         resetInputBehavior($('#add-tab div.prop-value input'), '', 1024);
     }
 
@@ -813,9 +813,9 @@ $(function() {
     updateCurrentRegionName();
 
     // Sets up field validation for the Add tab
-    resetInputBehavior($('#add-tab input#item-name'), '', 255, /[a-zA-Z0-9\._\-]/);
+    resetInputBehavior($('#add-tab input#item-name'), '', 255, /[a-zA-Z0-9\._\- ]/);
 
-    resetInputBehavior($('#add-tab div.prop-name input'), '', 255, /[a-zA-Z0-9\._\-]/);
+    resetInputBehavior($('#add-tab div.prop-name input'), '', 255, /[a-zA-Z0-9\._\- ]/);
     resetInputBehavior($('#add-tab div.prop-value input'), '', 1024);
 });
 // ]]>
