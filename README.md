@@ -1,5 +1,7 @@
 # SimpleDB--CRUD
 
+**NOTE:** Looks like AWS is finally giving up on Simple DB (see [this comment](https://github.com/aws/aws-sdk-js-v3/issues/1854#issuecomment-754142929)). So ... this repo is pretty much dead as well.
+
 User interface for working with SimpleDB. The missing console plug-in in the AWS tool set.
 
 ![Alt UI Preview](http://therealvan.com/image/projects/simpledb_crud.png)
